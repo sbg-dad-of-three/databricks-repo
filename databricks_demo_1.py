@@ -1,5 +1,43 @@
 # Databricks notebook source
+# MAGIC %md Create bronze database
 
+# COMMAND ----------
+
+import shutil
+from pyspark.sql.types import *
+# delete the old database and tables if needed
+_ = spark.sql('DROP DATABASE IF EXISTS bronze CASCADE')
+
+# create database to house SQL tables
+_ = spark.sql('CREATE DATABASE bronze')
+
+# COMMAND ----------
+
+# MAGIC %md Create silver database
+
+# COMMAND ----------
+
+import shutil
+from pyspark.sql.types import *
+# delete the old database and tables if needed
+_ = spark.sql('DROP DATABASE IF EXISTS silver CASCADE')
+
+# create database to house SQL tables
+_ = spark.sql('CREATE DATABASE silver')
+
+# COMMAND ----------
+
+# MAGIC %md Create gold database
+
+# COMMAND ----------
+
+import shutil
+from pyspark.sql.types import *
+# delete the old database and tables if needed
+_ = spark.sql('DROP DATABASE IF EXISTS gold CASCADE')
+
+# create database to house SQL tables
+_ = spark.sql('CREATE DATABASE gold')
 
 # COMMAND ----------
 
@@ -60,7 +98,11 @@ display(payments)
 
 # COMMAND ----------
 
-spark.sql("CREATE TABLE bronze_customers USING DELTA LOCATION 'dbfs:/demo_data/bronze/customer_data'")
+spark.sql('''
+          CREATE TABLE bronze.customers 
+          USING DELTA 
+          LOCATION 'dbfs:/demo_data/bronze/customer_data'
+          ''')
 
 # COMMAND ----------
 
@@ -74,6 +116,14 @@ spark.sql("CREATE TABLE bronze_customers USING DELTA LOCATION 'dbfs:/demo_data/b
 
 # COMMAND ----------
 
+spark.sql('''
+          CREATE TABLE bronze.orders 
+          USING DELTA 
+          LOCATION 'dbfs:/demo_data/bronze/order_data'
+          ''')
+
+# COMMAND ----------
+
 (
   payments
   .write
@@ -81,6 +131,14 @@ spark.sql("CREATE TABLE bronze_customers USING DELTA LOCATION 'dbfs:/demo_data/b
   .mode('overwrite')
   .save('dbfs:/demo_data/bronze/payment_data')
 )
+
+# COMMAND ----------
+
+spark.sql('''
+          CREATE TABLE bronze.payments 
+          USING DELTA 
+          LOCATION 'dbfs:/demo_data/bronze/payment_data'
+          ''')
 
 # COMMAND ----------
 
