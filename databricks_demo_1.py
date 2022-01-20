@@ -1,50 +1,17 @@
 # Databricks notebook source
-# MAGIC %md Create bronze database
+# MAGIC %md This notebook is used for initial setup
+# MAGIC 
+# MAGIC  + Read raw source data and write to delta
+# MAGIC  + Create the demo_bronze database to house SQL tables
+# MAGIC  + Write the bronze layer delta data to the demo_bronze SQL tables
 
 # COMMAND ----------
 
-import shutil
-from pyspark.sql.types import *
-# delete the old database and tables if needed
-_ = spark.sql('DROP DATABASE IF EXISTS bronze CASCADE')
-
-# create database to house SQL tables
-_ = spark.sql('CREATE DATABASE bronze')
+# MAGIC %md Read in demo data and write to bronze layer for delta lake
 
 # COMMAND ----------
 
-# MAGIC %md Create silver database
-
-# COMMAND ----------
-
-import shutil
-from pyspark.sql.types import *
-# delete the old database and tables if needed
-_ = spark.sql('DROP DATABASE IF EXISTS silver CASCADE')
-
-# create database to house SQL tables
-_ = spark.sql('CREATE DATABASE silver')
-
-# COMMAND ----------
-
-# MAGIC %md Create gold database
-
-# COMMAND ----------
-
-import shutil
-from pyspark.sql.types import *
-# delete the old database and tables if needed
-_ = spark.sql('DROP DATABASE IF EXISTS gold CASCADE')
-
-# create database to house SQL tables
-_ = spark.sql('CREATE DATABASE gold')
-
-# COMMAND ----------
-
-# MAGIC %md Read in demo data
-
-# COMMAND ----------
-
+# read in data
 customers = (
     spark.read.options(  header      = 'True'
                        , inferSchema = 'True') 
@@ -52,42 +19,8 @@ customers = (
               .load('dbfs:/FileStore/demo_data/jaffle_shop_customers.csv') 
 )
 
-# COMMAND ----------
 
-display(customers)
-
-# COMMAND ----------
-
-orders = (
-    spark.read.options(  header      = 'True'
-                       , inferSchema = 'True') 
-              .format('csv') 
-              .load('dbfs:/FileStore/demo_data/jaffle_shop_orders.csv') 
-)
-
-# COMMAND ----------
-
-display(orders)
-
-# COMMAND ----------
-
-payments = (
-    spark.read.options(  header      = 'True'
-                       , inferSchema = 'True') 
-              .format('csv') 
-              .load('dbfs:/FileStore/demo_data/stripe_payments.csv') 
-)
-
-# COMMAND ----------
-
-display(payments)
-
-# COMMAND ----------
-
-# MAGIC %md Write intial demo data to delta
-
-# COMMAND ----------
-
+# write to delta
 (
   customers
   .write
@@ -98,14 +31,16 @@ display(payments)
 
 # COMMAND ----------
 
-spark.sql('''
-          CREATE TABLE bronze.customers 
-          USING DELTA 
-          LOCATION 'dbfs:/demo_data/bronze/customer_data'
-          ''')
+# read in data
+orders = (
+    spark.read.options(  header      = 'True'
+                       , inferSchema = 'True') 
+              .format('csv') 
+              .load('dbfs:/FileStore/demo_data/jaffle_shop_orders.csv') 
+)
 
-# COMMAND ----------
 
+# write to delta
 (
   orders
   .write
@@ -116,14 +51,16 @@ spark.sql('''
 
 # COMMAND ----------
 
-spark.sql('''
-          CREATE TABLE bronze.orders 
-          USING DELTA 
-          LOCATION 'dbfs:/demo_data/bronze/order_data'
-          ''')
+# read in data
+payments = (
+    spark.read.options(  header      = 'True'
+                       , inferSchema = 'True') 
+              .format('csv') 
+              .load('dbfs:/FileStore/demo_data/stripe_payments.csv') 
+)
 
-# COMMAND ----------
 
+# write to delta
 (
   payments
   .write
@@ -134,12 +71,42 @@ spark.sql('''
 
 # COMMAND ----------
 
+# MAGIC %md Create demo_bronze database to house bronze layer tables
+
+# COMMAND ----------
+
+import shutil
+from pyspark.sql.types import *
+# delete the old database and tables if needed
+#_ = spark.sql('DROP DATABASE IF EXISTS demo_bronze CASCADE')
+
+# create database to house SQL tables
+_ = spark.sql('CREATE DATABASE demo_bronze')
+
+# COMMAND ----------
+
+# MAGIC %md Create queryable bronze layer delta tables 
+
+# COMMAND ----------
+
 spark.sql('''
-          CREATE TABLE bronze.payments 
+          CREATE TABLE demo_bronze.customers 
           USING DELTA 
-          LOCATION 'dbfs:/demo_data/bronze/payment_data'
+          LOCATION 'dbfs:/demo_data/bronze/customer_data'
           ''')
 
 # COMMAND ----------
 
+spark.sql('''
+          CREATE TABLE demo_bronze.orders 
+          USING DELTA 
+          LOCATION 'dbfs:/demo_data/bronze/order_data'
+          ''')
 
+# COMMAND ----------
+
+spark.sql('''
+          CREATE TABLE demo_bronze.payments 
+          USING DELTA 
+          LOCATION 'dbfs:/demo_data/bronze/payment_data'
+          ''')
