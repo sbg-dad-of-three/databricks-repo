@@ -21,13 +21,14 @@
 # COMMAND ----------
 
 customer_orders = (
-    spark.sql("")
+    spark.read.format("delta").load('/user/hive/warehouse/demo_gold.db/gold_customer_orders/')
 )
 
 
-SELECT 
-  gold_customer_orders.customer_status,
-  COUNT(DISTINCT gold_customer_orders.customer_id) AS customer_count,
-  AVG(gold_customer_orders.customer_lifetime_value) AS average_customer_lifetime_value
-FROM demo_gold.gold_customer_orders
-GROUP BY gold_customer_orders.customer_status
+# COMMAND ----------
+
+display(customer_orders)
+
+# COMMAND ----------
+
+

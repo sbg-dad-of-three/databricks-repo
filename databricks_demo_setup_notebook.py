@@ -26,7 +26,7 @@ customers = (
   .write
   .format('delta')
   .mode('overwrite')
-  .save('dbfs:/demo_data/bronze/customer_data')
+  .save('dbfs:/FileStore/demo_data/bronze/customer_data')
 )
 
 # COMMAND ----------
@@ -46,7 +46,7 @@ orders = (
   .write
   .format('delta')
   .mode('overwrite')
-  .save('dbfs:/demo_data/bronze/order_data')
+  .save('dbfs:/FileStore/demo_data/bronze/order_data')
 )
 
 # COMMAND ----------
@@ -66,7 +66,7 @@ payments = (
   .write
   .format('delta')
   .mode('overwrite')
-  .save('dbfs:/demo_data/bronze/payment_data')
+  .save('dbfs:/FileStore/demo_data/bronze/payment_data')
 )
 
 # COMMAND ----------
@@ -92,7 +92,7 @@ _ = spark.sql('CREATE DATABASE demo_bronze')
 spark.sql('''
           CREATE TABLE demo_bronze.customers 
           USING DELTA 
-          LOCATION 'dbfs:/demo_data/bronze/customer_data'
+          LOCATION 'dbfs:/FileStore/demo_data/bronze/customer_data'
           ''')
 
 # COMMAND ----------
@@ -100,7 +100,7 @@ spark.sql('''
 spark.sql('''
           CREATE TABLE demo_bronze.orders 
           USING DELTA 
-          LOCATION 'dbfs:/demo_data/bronze/order_data'
+          LOCATION 'dbfs:/FileStore/demo_data/bronze/order_data'
           ''')
 
 # COMMAND ----------
@@ -108,5 +108,15 @@ spark.sql('''
 spark.sql('''
           CREATE TABLE demo_bronze.payments 
           USING DELTA 
-          LOCATION 'dbfs:/demo_data/bronze/payment_data'
+          LOCATION 'dbfs:/FileStore/demo_data/bronze/payment_data'
           ''')
+
+# COMMAND ----------
+
+# MAGIC %sh
+# MAGIC cd /dbfs/user/hive/warehouse/demo_gold.db/
+# MAGIC ls -l
+
+# COMMAND ----------
+
+
